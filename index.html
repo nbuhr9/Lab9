@@ -54,19 +54,112 @@
     <button>Console Trace</button>
     <button>Trigger a Global Error</button>
   </section>
-
+  
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
   <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "95bd2b83692e4ed4928192667a9d3561"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+  </script>
+  <script>
+    class DivideByZero extends Error {
+      constructor(message) {
+        super(message);
+        this.name = "DivideByZero";
+      }
+    }
+    
     let calculateBtn = document.querySelector('#calculate');
     calculateBtn.addEventListener('click', () => {
       let output = document.querySelector('output');
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
-      let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      let operator = document.querySelector('#operator').value;      
+      try {
+        if (firstNum == '' || secondNum == '') {
+          throw new Error('Number fields empty');
+          
+        } else if (secondNum == '0' && operator == '/') {
+          throw new DivideByZero('Cannot divide by zero');
+          
+        } else {
+          output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+        }
+        
+      } catch (err) {
+        console.error(err.name + `: ` + err.message);
+        
+      } finally {
+        console.log('Calculate button was clicked');
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
+    
     // TODO - Make buttons functional
+    
+    window.onerror = (function (msg, url, lineNo, columnNo, error) {
+      console.log('Error: ' + msg);
+    });
+    
+    errorBtns[0].addEventListener('click', () => {
+      TrackJS.track('Testing TrackJS!');
+      console.log('Console Log Demo');
+    })
+    
+    errorBtns[1].addEventListener('click', () => {
+      console.error('Console Error Demo');
+    })
+    
+    errorBtns[2].addEventListener('click', () => {
+      console.dir(errorBtns[2]);
+    })
+    
+    errorBtns[3].addEventListener('click', () => {
+      console.dirxml(document.body);
+    })
+    
+    errorBtns[4].addEventListener('click', () => {
+      console.group();
+    })
+    
+    errorBtns[5].addEventListener('click', () => {
+      console.groupEnd();
+    })
+    
+    errorBtns[6].addEventListener('click', () => {
+      console.table([
+        { name: 'Nataly', group: '30' },
+        { name: 'Andrew', group: '30' },
+        { name: 'Thet', group: '30' },
+        { name: 'Sonika', group: '30' },
+        { name: 'Angus', group: '30' },
+        { name: 'Eric', group: '30' },
+        { name: 'Ikjoon', group: '30' },
+        { name: 'Joe', group: '30' }
+      ]);
+    })
+    
+    errorBtns[7].addEventListener('click', () => {
+      console.time();
+    })
+    
+    errorBtns[8].addEventListener('click', () => {
+      console.timeEnd();
+    })
+    
+    errorBtns[9].addEventListener('click', () => {
+      const first = () => { second() };
+      const second = () => { third() };
+      const third = () => { four() };
+      const four = () => { console.trace() };
+      first();
+    })
+    
+    errorBtns[10].addEventListener('click', function() {
+      undefinedFunc();
+    });
   </script>
 </body>
 </html>
